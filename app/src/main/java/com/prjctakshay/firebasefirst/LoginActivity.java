@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.service.autofill.TextValueSanitizer;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -23,12 +22,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class RegisterActivity extends AppCompatActivity {
-
+public class LoginActivity extends AppCompatActivity {
     //views
     EditText mEmail,mPwd;
-    Button mReg;
-    TextView alredyAcTv;
+    Button mLogin;
+    TextView notAcTv;
     //progress bar
     ProgressDialog progressDialog;
     //Declare an instance of FirebaseAuth
@@ -36,33 +34,27 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
-
+        setContentView(R.layout.activity_login);
         ActionBar actionBar=getSupportActionBar();
-        actionBar.setTitle("create account");
+        actionBar.setTitle("login");
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
-
-        //init
         mEmail=findViewById(R.id.emailEt);
         mPwd=findViewById(R.id.passwordEt);
-        mReg=findViewById(R.id.registerBtn);
-        alredyAcTv=findViewById(R.id.have_accountTv);
-
-        //In the onCreate() method, initialize the FirebaseAuth instance.
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
-
+        mLogin=findViewById(R.id.loginBtn);
+        notAcTv=findViewById(R.id.nothave_accountTv);
 
         progressDialog=new ProgressDialog(this);
-        progressDialog.setMessage("Registering ...");
-        //reg btn action
-        mReg.setOnClickListener(new View.OnClickListener() {
+        progressDialog.setMessage("loging  ...");
+        // Initialize Firebase Auth
+
+        mAuth = FirebaseAuth.getInstance();
+
+        mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String email=mEmail.getText().toString().trim();
                 String password=mPwd.getText().toString().trim();
-                //validation
                 if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
                     mEmail.setError("invalid");
                     mEmail.setFocusable(true);
@@ -72,44 +64,41 @@ public class RegisterActivity extends AppCompatActivity {
                     mPwd.setFocusable(true);
                 }
                 else {
-                    registerUser(email,password);
+                    loginUser(email,password);
                 }
-
             }
         });
-        alredyAcTv.setOnClickListener(new View.OnClickListener() {
+        notAcTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(RegisterActivity.this,LoginActivity.class));
+                startActivity(new Intent(LoginActivity.this,RegisterActivity.class));
                 finish();
             }
         });
-
     }
 
-    private void registerUser(String email, String password) {
+    private void loginUser(String email, String password) {
         progressDialog.show();
-        mAuth.createUserWithEmailAndPassword(email, password)
+        mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            //Log.d(TAG, "createUserWithEmail:success");
                             progressDialog.dismiss();
+                            // Sign in success, update UI with the signed-in user's information
+                          //  Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(RegisterActivity.this, "regidtered", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(RegisterActivity.this,ProfileActivity.class));
+                            startActivity(new Intent(LoginActivity.this,ProfileActivity.class));
                             finish();
                            // updateUI(user);
                         } else {
                             progressDialog.dismiss();
                             // If sign in fails, display a message to the user.
-                           // Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.",
+                          //  Log.w(TAG, "signInWithEmail:failure", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
 
-                           // updateUI(null);
+                            //updateUI(null);
                         }
 
                         // ...
@@ -118,7 +107,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception e) {
                 progressDialog.dismiss();
-                Toast.makeText(RegisterActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
